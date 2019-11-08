@@ -12,11 +12,10 @@ from translate_cli.lang_codes import LANG_MAP
 def list_codes():
     for index, i in enumerate(LANG_MAP.items()):
         if index % 2 == 0:
-            print(f'{i[1]["name"]:20} \
--->   {UNDERLINE.format(BOLD.format(i[0])):3}', end=f'{"":3}')
+            print(f'{i[1]["name"]:20}-->   {UNDERLINE.format(BOLD.format(i[0])):3}', end=f'{"":3}')
         else:
-            print(f'{i[1]["name"]:20} \
--->   {UNDERLINE.format(BOLD.format(i[0])):3}')
+            print(f'{i[1]["name"]:20}-->   {UNDERLINE.format(BOLD.format(i[0])):3}')
+
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
@@ -36,16 +35,31 @@ def parse_args(argv=None):
         help='list supported language codes'
     )
     parser.add_argument(
-        '-d', '--dictionary-mode',
+        '-a', '--all',
         action='store_true',
         default=False,
-        help='dictionary mode'
+        help='show all about the translation'
+    )
+    parser.add_argument(
+        '-d', '--definition',
+        action='store_true',
+        default=False,
+        help='show definition (if exist)'
+    )
+    parser.add_argument(
+        '-r', '--reverse',
+        action='store_true',
+        default=False,
+        help='revese translations from dictionary (if exist)'
     )
     parser.set_defaults(
         src_lang='auto',
-        dst_lang='en'
+        dst_lang='es'
     )
     args, texts = parser.parse_known_args(argv)
+
+    # TODO: DELETE this line, is only for test case
+    # del texts[0]
 
     if args.list:
         list_codes()
@@ -53,8 +67,8 @@ def parse_args(argv=None):
     for text in texts[:]:
         if ':' in text:
             languages = text.split(':')
-            args.src_lang = languages[0] if languages[0] else 'auto'
-            args.dst_lang = languages[1] if languages[1] else 'en'
+            args.src_lang = languages[0] if languages[0] else parser._defaults["src_lang"]
+            args.dst_lang = languages[1] if languages[1] else parser._defaults["dst_lang"]
             texts.remove(text)
     if not texts:
         parser.print_help()
@@ -64,24 +78,24 @@ def parse_args(argv=None):
         raise ValueError('Invalid language code.')
     return args
 
-def dict_print(translation):
+
+def definition_print(translation):
+    print()
     text = translation['text']
 
-    text_pron = translation['text_pron']\
-    if translation['text_pron'] and \
-        isinstance(translation['text_pron'], str) else None
+    if not translation['text_defi']:
+        print(f'=> {UNDERLINE.format(text)} don''t have definition <=')
+        return
 
-    print(text)
-    if text_pron:
-        print(f'/{ITALIC.format(text_pron)}/')
-    print()
+    print(f'=> Definitions of {UNDERLINE.format(text)}')
+
     for i in translation['text_defi']:
         print(i[0])
         for _i in i[1]:
             print(f'{" ":4}{_i}\n')
 
     if translation['text_syno']:
-        print('Synonyms')
+        print(f'=> Synonyms of {UNDERLINE.format(text)}')
     for j in translation['text_syno']:
         print(f'{" ":4}{j[0]}')
         for _j in j[1]:
@@ -89,7 +103,7 @@ def dict_print(translation):
         print()
 
     if translation['text_exam']:
-        print('Example')
+        print(f'=> Examples of {UNDERLINE.format(text)}')
     for k in translation['text_exam']:
         k = k.replace('<b>', '\033[1m\033[4m')
         k = k.replace('</b>', '\033[0m')
@@ -97,21 +111,21 @@ def dict_print(translation):
 
 
 def trans_print(translation):
+    print()
     text = translation['text']
 
     text_lang = LANG_MAP[translation['text_lang'][:2]]['name'] \
-    if LANG_MAP.get(translation['text_lang'][:2]) \
-    else translation['text_lang']
+        if LANG_MAP.get(translation['text_lang'][:2]) \
+        else translation['text_lang']
+
     text_pron = translation['text_pron']\
-    if translation['text_pron'] and \
+        if translation['text_pron'] and \
         isinstance(translation['text_pron'], str) else None
 
     trans = translation['trans']
-    trans_lang = LANG_MAP[translation['trans_lang']]['name']
-    trans_all = ', '.join(translation['trans_all'])
 
     trans_pron = translation['trans_pron']\
-    if translation['trans_pron'] and \
+        if translation['trans_pron'] and \
         isinstance(translation['trans_pron'], str) else None
 
     print(text)
@@ -122,20 +136,52 @@ def trans_print(translation):
     if trans_pron:
         print(f'/{ITALIC.format(trans_pron)}/')
     print()
-    print(f'Translation of {UNDERLINE.format(text)}')
+
+
+def trans_alternate(translation):
+    print()
+    text = translation['text']
+
+    text_lang = LANG_MAP[translation['text_lang'][:2]]['name'] \
+        if LANG_MAP.get(translation['text_lang'][:2]) \
+        else translation['text_lang']
+
+    trans_lang = LANG_MAP[translation['trans_lang']]['name']
+    trans_all = ', '.join(translation['trans_all']) if len(
+        text) <= 20 else f'\n{"":3}'.join(translation['trans_all'])
+
+    print(f'=> Other alternatives of {UNDERLINE.format(text)}')
     print(f'[ {UNDERLINE.format(text_lang)} -> {BOLD.format(trans_lang)} ]')
     print()
     print(f'{UNDERLINE.format(text)}')
-    print(f'    {BOLD.format(trans_all)}')
+    print(f'   {trans_all}')
+    print()
 
-def main(argv=None):
+
+def trans_reverse(translation):
+    if not translation['trans_verbose']:
+        return
+    print()    
+    text = translation['text']
+    print(f'=> Other translations of {UNDERLINE.format(text)}')
+    print()
+    for i in translation['trans_verbose']:
+        print(i[0])
+        for _i in i[1]:
+            print(f'{"":4}{BOLD.format(_i[0])}\n{"":7}{", ".join(_i[1])}\n')
+
+# def main(argv=None):
+def main(argv=sys.argv):
     args = parse_args(argv)
     translation = translate(args.text, args.src_lang, args.dst_lang)
     translation['trans_lang'] = args.dst_lang
-    if args.dictionary_mode:
-        dict_print(translation)
-    else:
-        trans_print(translation)
+    trans_print(translation)
+    trans_alternate(translation)
+    if args.reverse or args.all:
+        trans_reverse(translation)
+    if args.definition or args.all:
+        definition_print(translation)
+    return 0
 
 if __name__ == '__main__':
     sys.exit(main())
