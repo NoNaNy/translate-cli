@@ -1,10 +1,10 @@
 '''a lightweight command-line translator'''
 
-__version__ = '1.0.5'
+__version__ = '1.1.8'
 
 from . import request, parse
 
-def translate(text, src_lang='auto', dst_lang='en'):
+def translate(text, src_lang='auto', dst_lang='en', engine='g'):
     '''Return a dict that consists of:
 
     - text
@@ -30,4 +30,4 @@ def translate(text, src_lang='auto', dst_lang='en'):
         all translations of the text, and synonyms(in original language)
     for each translation
     '''
-    return parse.parse(request.request(text, src_lang, dst_lang))
+    return parse.parseResponse(request.requestEngine(text, src_lang, dst_lang, engine), text, engine)

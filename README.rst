@@ -7,11 +7,11 @@ Features
 --------
 - Translate words, sentences inside your shell.
 
-- Detect source language automaticly.
+- Detect source language automatically.
 
 - Dictionary mode.
 
-- Formatted output (refered to `Translate Shell`_)
+- Formatted output (referred to `Translate Shell`_)
 
 - SSL Default, query text with HTTPS instead of insecure HTTP.
 

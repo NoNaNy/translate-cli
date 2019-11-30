@@ -3,22 +3,31 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
-
+    "configurations": [        
         {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            //"program": "${file}",
+            "program": "${workspaceFolder}/translate_cli/interface.py",
             "console": "internalConsole",
             "args": [
-                "-d",
+                //"-h",
+                //"-d",
+                //"-v",
+                //"-x",
+                //"-e=d",
                 //"-l",
-                "-r",
+                //"-r",
                 //"underline the stressed syllable",
-                "coming from home",
-                //"awesome",
-                 "en:es"
+                //"coming from home",                                
+                //":es",
+                //":zh"
+                //":zh-CN"
+                ":lo",
+                //"awesome"
+                //" "
+                "python"
             ]
         }
     ]

@@ -1,7 +1,7 @@
 import setuptools
 from translate_cli import __version__
 
-with open('README.rst', 'r') as f:
+with open('README.rst', 'r', encoding='utf8') as f:
     README = f.read()
 
 setuptools.setup(
