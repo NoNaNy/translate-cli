@@ -6,7 +6,7 @@ import os.path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../'))
 from translate_cli import translate
-from translate_cli.format import BOLD, ITALIC, UNDERLINE
+from translate_cli.format import BOLD, ITALIC, UNDERLINE, GRAY
 from translate_cli.lang_codes import LANG_MAP
 from translate_cli import __version__
 
@@ -102,7 +102,7 @@ def parse_args(argv=None):
     args, texts = parser.parse_known_args(argv)
 
     # NOTE: DELETE this line, is only for debug
-    # del texts[0]
+    del texts[0]
 
     if args.list:
         list_codes()
@@ -160,7 +160,7 @@ def examples_print(translation):
         print(f'{" ":4}- {k}\n')
     print()
 
-def trans_print(translation):
+def trans_print(translation, engine):
     print()
     text = translation['text']
 
@@ -177,6 +177,13 @@ def trans_print(translation):
     trans_pron = translation['trans_pron']\
         if translation['trans_pron'] and \
         isinstance(translation['trans_pron'], str) else None
+
+    if engine == 'g':
+        print(f'{UNDERLINE.format(GRAY.format("Google Translate"))}')
+    if engine == 'd':
+        print(f'{UNDERLINE.format(GRAY.format("DeepL Translator"))}')
+    if engine == 'b':
+        print(f'{UNDERLINE.format(GRAY.format("Bing Translator"))}')
 
     print(text)
     if text_pron:
@@ -223,7 +230,7 @@ def main(argv=sys.argv):
     args = parse_args(argv)
     translation = translate(args.text, args.src_lang, args.dst_lang, args.engine)
     translation['trans_lang'] = args.dst_lang
-    trans_print(translation)
+    trans_print(translation, args.engine)
     trans_alternate(translation)
     if args.reverse or args.all:
         trans_reverse(translation)
