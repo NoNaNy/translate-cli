@@ -12,6 +12,7 @@ setuptools.setup(
         description='A lightweight cli translate tool',
         long_description=README,
         packages=setuptools.find_packages(),
+        install_requires=["requests"],
         entry_points={
             'console_scripts': [
                 'trans=translate_cli.interface:main',
